@@ -11,6 +11,7 @@ action :add do
 
     user = new_resource.user
     webui_port = new_resource.webui_port
+    cdomain = new_resource.cdomain
     routes = local_routes()
 
     yum_package "nginx" do
@@ -23,7 +24,7 @@ action :add do
       system true
     end
 
-    %w[ /var/www /var/www/cache /var/log/nginx ].each do |path|
+    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl ].each do |path|
       directory path do
         owner user
         group user
@@ -32,42 +33,71 @@ action :add do
       end
     end
 
-    template "/etc/nginx/nginx.conf" do
-      source "nginx.conf.erb"
-      owner user
-      group user
-      mode 0644
-      cookbook nginx
-      variable(:user => user)
-      notifies :restart, "service[nginx]"
-    end
+    nginx_cert_item = data_bag_item("certs","nginx") rescue nginx_cert_item = {}
 
-    template "/etc/nginx/conf.d/webui.conf" do
-      source "webui.conf.erb"
-      owner user
-      group user
-      mode 0644
-      cookbook nginx
-      variable(:webui_port => webui_port)
-      notifies :restart, "service[nginx]"
-    end
+    unless nginx_cert_item.empty?
+      template "/etc/nginx/ssl/webui.crt" do
+        source "webui.crt.erb"
+        owner user
+        group user
+        mode 0640
+        retries 2
+        variables(:crt => nginx_cert_item["webui_crt"])
+      end
 
-    template "/etc/nginx/conf.d/redirect.conf" do
-      source "redirect.conf.erb"
-      owner user
-      group user
-      mode 0644
-      cookbook nginx
-      variable(:routes => routes)
-      notifies :restart, "service[nginx]"
-    end
+      template "/etc/nginx/ssl/webui.key" do
+        source "webui.key.erb"
+        owner user
+        group user
+        mode 0640
+        retries 2
+        variables(:key => nginx_cert_item["webui_key"])
+      end
 
-    service "nginx" do
-      service_name "nginx"
-      ignore_failure true
-      supports :status => true, :reload => true, :restart => true, :enable => true
-      action [:start, :enable]
-    end 
+      template "/etc/nginx/nginx.conf" do
+        source "nginx.conf.erb"
+        owner user
+        group user
+        mode 0644
+        cookbook "nginx"
+        variables(:user => user)
+        notifies :restart, "service[nginx]"
+      end
+
+      template "/etc/nginx/conf.d/webui.conf" do
+        source "webui.conf.erb"
+        owner user
+        group user
+        mode 0644
+        cookbook "nginx"
+        variables(:webui_port => webui_port)
+        notifies :restart, "service[nginx]"
+      end
+
+      template "/etc/nginx/conf.d/redirect.conf" do
+        source "redirect.conf.erb"
+        owner user
+        group user
+        mode 0644
+        cookbook "nginx"
+        variables(:routes => routes)
+        notifies :restart, "service[nginx]"
+      end
+
+      service "nginx" do
+        service_name "nginx"
+        ignore_failure true
+        supports :status => true, :reload => true, :restart => true, :enable => true
+        action [:start, :enable]
+      end
+    else
+      service "nginx" do
+        service_name "nginx"
+        ignore_failure true
+        supports :status => true, :reload => true, :restart => true, :enable => true
+        action [:stop, :disable]
+      end
+    end
 
      Chef::Log.info("nginx has been configured correctly")
   rescue => e

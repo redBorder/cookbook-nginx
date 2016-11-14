@@ -1,4 +1,4 @@
-PACKAGE_NAME?=	cookbook-example
+PACKAGE_NAME?=	cookbook-nginx
 
 VERSION?=	$(shell git describe --abbrev=6 --tags HEAD --always | sed 's/-/_/g')
 

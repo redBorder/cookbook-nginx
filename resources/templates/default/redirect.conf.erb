@@ -15,7 +15,7 @@ server {
   }
 
   location / { 
-    access_log /var/log/nginx/redirect.log nginx;
+    access_log /var/log/nginx/redirect.log main;
     rewrite ^(.*) https://$host$1 permanent;
   }
 }
