@@ -107,8 +107,26 @@ end
 
 action :remove do
   begin
-     # ... your code here ...
-     Chef::Log.info("nginx has been deleted correctly")
+    
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :enable => true
+      action [:stop, :disable]
+    end
+
+    %w[ /var/www/cache /var/log/nginx /etc/nginx ].each do |path|
+      directory path do
+        recursive true
+        action :delete
+      end
+    end
+
+    yum_package "nginx" do
+      action :remove
+    end
+
+    Chef::Log.info("nginx has been deleted correctly")
   rescue => e
     Chef::Log.error(e.message)
   end
