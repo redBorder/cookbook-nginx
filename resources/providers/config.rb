@@ -42,6 +42,7 @@ action :add do
         group user
         mode 0640
         retries 2
+        cookbook "nginx"
         variables(:crt => nginx_cert_item["webui_crt"])
       end
 
@@ -51,6 +52,7 @@ action :add do
         group user
         mode 0640
         retries 2
+        cookbook "nginx"
         variables(:key => nginx_cert_item["webui_key"])
       end
 
