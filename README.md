@@ -1,4 +1,4 @@
-# example Cookbook
+# Nginx Cookbook
 
 cookbook to install and configure redborder nginx cookbook
 

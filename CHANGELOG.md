@@ -1,14 +1,17 @@
-cookbook-example CHANGELOG
+cookbook-nginx CHANGELOG
 ==========================
 
-This file is used to list changes made in each version of the example cookbook.
+This file is used to list changes made in each version of the nginx cookbook.
 
 0.0.1
 -----
-- [your_name]
-  - COMMIT_REF Initial release of cookbook example
+- [cjmateos]
+  - fc33df3 Fix in ADD action fo config resource
 
-- - -
-Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
-
-The [Github Flavored Markdown page](http://github.github.com/github-flavored-markdown/) describes the differences between markdown on github and standard markdown.
+- [jjprieto]
+  - 781cd56 check if webui service is regitered in consul
+  - 5d35fa0 fix template missing from other cookbook
+  - 9e9e552 improve remove action in providers
+  - 85b63b5 add certificate from databag and improve spec
+  - 03dbd77 skel creation
+  - 9e8d179 Initial commit
