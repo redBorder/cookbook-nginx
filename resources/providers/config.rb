@@ -92,6 +92,7 @@ action :add do
         supports :status => true, :reload => true, :restart => true, :enable => true
         action [:start, :enable]
       end
+      node.default["nginx"]["up"] = true
     else
       service "nginx" do
         service_name "nginx"
@@ -100,7 +101,7 @@ action :add do
         action [:stop, :disable]
       end
     end
-
+    
      Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
     Chef::Log.error(e.message)
@@ -136,7 +137,7 @@ end
 
 action :register do
   begin
-    if !node["nginx"]["registered"]
+    if !node["nginx"]["registered"] and node["nginx"]["up"]
       query = {}
       query["ID"] = "nginx-#{node["hostname"]}"
       query["Name"] = "nginx"
