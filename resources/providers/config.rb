@@ -24,7 +24,7 @@ action :add do
       system true
     end
 
-    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl ].each do |path|
+    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
       directory path do
         owner user
         group user
@@ -109,7 +109,7 @@ end
 
 action :remove do
   begin
-    
+
     service "nginx" do
       service_name "nginx"
       ignore_failure true
