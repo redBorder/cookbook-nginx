@@ -35,7 +35,7 @@ action :add do
 
     nginx_cert_item = data_bag_item("certs","nginx") rescue nginx_cert_item = {}
 
-    unless nginx_cert_item.empty?
+    unless nginx_cert_item.empty? or !check_webui_service
       template "/etc/nginx/ssl/webui.crt" do
         source "webui.crt.erb"
         owner user
@@ -72,7 +72,7 @@ action :add do
         group user
         mode 0644
         cookbook "nginx"
-        variables(:webui_port => webui_port)
+        variables(:webui_port => webui_port, :cdomain => cdomain)
         notifies :restart, "service[nginx]"
       end
 
@@ -101,7 +101,7 @@ action :add do
       end
     end
 
-     Chef::Log.info("nginx has been configured correctly")
+     Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -128,7 +128,7 @@ action :remove do
       action :remove
     end
 
-    Chef::Log.info("nginx has been deleted correctly")
+    Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -150,9 +150,8 @@ action :register do
       end.run_action(:run)
 
       node.set["nginx"]["registered"] = true
+      Chef::Log.info("Nginx service has been registered to consul")
     end
-
-    Chef::Log.info("Nginx service has been registered to consul")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -167,9 +166,8 @@ action :deregister do
       end.run_action(:run)
 
       node.set["nginx"]["registered"] = false
+      Chef::Log.info("Nginx service has been deregistered from consul")
     end
-
-    Chef::Log.info("Nginx service has been deregistered from consul")
   rescue => e
     Chef::Log.error(e.message)
   end

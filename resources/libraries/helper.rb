@@ -1,7 +1,8 @@
 module Nginx
   module Helper
-  	require 'net/ip'
-  	require 'openssl'
+    require 'net/ip'
+    require 'openssl'
+    require 'resolv'
     def local_routes()
       # return all local routes that exist in the system
       routes = []
@@ -13,6 +14,7 @@ module Nginx
       routes
     end
     def create_cert(cn)
+      # Return a hash with private key and certificate in x509 format
     	key = OpenSSL::PKey::RSA.new 4096
     	name = OpenSSL::X509::Name.parse "CN=#{cn}/DC=redborder"
     	cert = OpenSSL::X509::Certificate.new
@@ -28,16 +30,17 @@ module Nginx
     	cert.add_extension extension_factory.create_extension('subjectKeyIdentifier', 'hash')
     	cert.issuer = name
     	cert.sign key, OpenSSL::Digest::SHA1.new
-    	#open "/etc/nginx/ssl/#{filename}.crt", 'w' do |io|
-        #	io.write cert.to_pem
-    	#end
-    	#open "/etc/nginx/ssl/#{filename}.key", 'w' do |io|
-        #	io.write key.to_pem
-    	#end
-    	#open "/etc/nginx/ssl/#{filename}_public_key.pem", 'w' do |io|
-    	#	io.write key.public_key.to_pem
-      	#end
-      	{ :key => key, :crt => cert}
+      { :key => key, :crt => cert}
+    end
+    def check_webui_service()
+      # check if webui.service can be resolved (in other words, registered as a service in consul)
+      address = nil
+      begin
+        address = Resolv.getaddress("webui.service")
+      rescue
+        address = false
+      end
+      address
     end
   end
 end

@@ -3,7 +3,7 @@
 #######################################################
 
 upstream webui {
-    server webui.service:<%= @webui_port %> weight=2 max_fails=3 fail_timeout=5s;
+    server webui.service.<%= @cdomain %>:<%= @webui_port %> weight=2 max_fails=3 fail_timeout=5s;
   }
 
 server {
