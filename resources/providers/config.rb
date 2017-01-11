@@ -101,7 +101,7 @@ action :add do
         action [:stop, :disable]
       end
     end
-    
+
      Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
     Chef::Log.error(e.message)
@@ -147,6 +147,8 @@ action :register do
 
       execute 'Register service in consul' do
          command "curl http://localhost:8500/v1/agent/service/register -d '#{json_query}' &>/dev/null"
+         retries 3
+         retry_delay 2
          action :nothing
       end.run_action(:run)
 
