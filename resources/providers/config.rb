@@ -118,16 +118,16 @@ action :remove do
       action [:stop, :disable]
     end
 
-    %w[ /var/www/cache /var/log/nginx /etc/nginx ].each do |path|
-      directory path do
-        recursive true
-        action :delete
-      end
-    end
+    #%w[ /var/www/cache /var/log/nginx /etc/nginx ].each do |path|
+    #  directory path do
+    #    recursive true
+    #    action :delete
+    #  end
+    #end
 
-    yum_package "nginx" do
-      action :remove
-    end
+    #yum_package "nginx" do
+    #  action :remove
+    #end
 
     Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
