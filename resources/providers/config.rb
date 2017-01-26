@@ -6,6 +6,80 @@
 
 include Nginx::Helper
 
+action :add_solo do
+  begin
+    user = new_resource.user
+    cdomain = new_resource.cdomain
+    routes = local_routes()
+
+    yum_package "nginx" do
+      action :upgrade
+      flush_cache [:before]
+    end
+
+    user user do
+      action :create
+      system true
+    end
+
+    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
+      directory path do
+        owner user
+        group user
+        mode 0755
+        action :create
+      end
+    end
+
+    # Create S3 certificate
+    json_cert = Chef::JSONCompat.parse(`rb_create_certs -a s3 -c #{cdomain}`)
+
+    template "/etc/nginx/ssl/s3.crt" do
+      source "cert.crt.erb"
+      owner user
+      group user
+      mode 0644
+      retries 2
+      cookbook "nginx"
+      variables(:crt => json_cert["s3_crt"])
+      action :create_if_missing
+    end
+
+    template "/etc/nginx/ssl/s3.key" do
+      source "cert.key.erb"
+      owner user
+      group user
+      mode 0644
+      retries 2
+      cookbook "nginx"
+      variables(:key => json_cert["s3_key"])
+      action :create_if_missing
+    end
+
+    # generate nginx config
+    template "/etc/nginx/nginx.conf" do
+      source "nginx.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:user => user)
+      notifies :restart, "service[nginx]"
+    end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:start, :enable]
+    end
+
+    Chef::Log.info("Nginx cookbook has been processed")
+ rescue => e
+   Chef::Log.error(e.message)
+ end
+end
+
 action :add do
   begin
 
@@ -37,7 +111,7 @@ action :add do
 
     unless nginx_cert_item.empty? or !check_webui_service
       template "/etc/nginx/ssl/webui.crt" do
-        source "webui.crt.erb"
+        source "cert.crt.erb"
         owner user
         group user
         mode 0640
@@ -47,7 +121,7 @@ action :add do
       end
 
       template "/etc/nginx/ssl/webui.key" do
-        source "webui.key.erb"
+        source "cert.key.erb"
         owner user
         group user
         mode 0640

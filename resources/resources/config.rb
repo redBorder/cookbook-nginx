@@ -3,7 +3,7 @@
 # Resource:: config
 #
 
-actions :add, :remove, :register, :deregister
+actions :add_solo, :add, :remove, :register, :deregister
 default_action :add
 
 attribute :user, :kind_of => String, :default => "nginx"
