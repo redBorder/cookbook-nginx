@@ -8,5 +8,6 @@
 #
 
 nginx_config "config" do
-  action :add_solo
+  service_name "test"
+  action [:add, :configure_certs]
 end
