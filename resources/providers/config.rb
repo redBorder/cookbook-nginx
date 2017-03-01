@@ -60,13 +60,7 @@ action :configure_certs do
     cdomain = new_resource.cdomain
     service_name = new_resource.service_name
 
-    #Check if certs exists in a data bag
-    nginx_cert_item = data_bag_item("certs",service_name) rescue nginx_cert_item = {}
-
-    if nginx_cert_item.empty?
-      # Create S3 certificate
-      json_cert = Chef::JSONCompat.parse(`rb_create_certs -a #{service_name} -c #{cdomain}`)
-    end
+    json_cert = nginx_certs(service_name,cdomain)
 
     template "/etc/nginx/ssl/#{service_name}.crt" do
       source "cert.crt.erb"
@@ -75,8 +69,9 @@ action :configure_certs do
       mode 0644
       retries 2
       cookbook "nginx"
+      not_if {json_cert.empty?}
       variables(:crt => json_cert["#{service_name}_crt"])
-      action :create_if_missing
+      action :create
     end
 
     template "/etc/nginx/ssl/#{service_name}.key" do
@@ -86,8 +81,9 @@ action :configure_certs do
       mode 0644
       retries 2
       cookbook "nginx"
+      not_if {json_cert.empty?}
       variables(:key => json_cert["#{service_name}_key"])
-      action :create_if_missing
+      action :create
     end
 
     Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
@@ -96,41 +92,51 @@ action :configure_certs do
  end
 end
 
+action :add_s3 do #TODO: Create this resource in minio cookbook
+  begin
+    s3_port = new_resource.s3_port
+
+    template "/etc/nginx/conf.d/s3.conf" do
+      source "s3.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:s3_port => s3_port)
+      notifies :restart, "service[nginx]"
+    end
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
 action :add_webui do #TODO: Create this resource in webui cookbook
   begin
-
     user = new_resource.user
     webui_port = new_resource.webui_port
     cdomain = new_resource.cdomain
     routes = local_routes()
 
-    if check_webui_service # If webui service is running
-
-      template "/etc/nginx/conf.d/webui.conf" do
-        source "webui.conf.erb"
-        owner user
-        group user
-        mode 0644
-        cookbook "nginx"
-        variables(:webui_port => webui_port, :cdomain => cdomain)
-        notifies :restart, "service[nginx]"
-      end
-
-      template "/etc/nginx/conf.d/redirect.conf" do
-        source "redirect.conf.erb"
-        owner user
-        group user
-        mode 0644
-        cookbook "nginx"
-        variables(:routes => routes)
-        notifies :restart, "service[nginx]"
-      end
-
-      Chef::Log.info("Nginx - Webui configuration has been processed successfully")
-    else
-      Chef::Log.info("Nginx - Webui configuration can't be processed. Webui service is not running")
+    template "/etc/nginx/conf.d/webui.conf" do
+      source "webui.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:webui_port => webui_port, :cdomain => cdomain)
+      notifies :restart, "service[nginx]"
     end
 
+    template "/etc/nginx/conf.d/redirect.conf" do
+      source "redirect.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:routes => routes)
+      notifies :restart, "service[nginx]"
+    end
+    Chef::Log.info("Nginx - Webui configuration has been processed successfully")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -154,7 +160,8 @@ end
 
 action :register do
   begin
-    if !node["nginx"]["registered"]
+    consul_servers = system('serf members -tag consul=ready | grep consul=ready &> /dev/null')
+    if !node["nginx"]["registered"] and consul_servers
       query = {}
       query["ID"] = "nginx-#{node["hostname"]}"
       query["Name"] = "nginx"
@@ -179,7 +186,8 @@ end
 
 action :deregister do
   begin
-    if node["nginx"]["registered"]
+    consul_servers = system('serf members -tag consul=ready | grep consul=ready &> /dev/null')
+    if node["nginx"]["registered"] and consul_servers
       execute 'Deregister service in consul' do
         command "curl http://localhost:8500/v1/agent/service/deregister/nginx-#{node["hostname"]} &>/dev/null"
         action :nothing

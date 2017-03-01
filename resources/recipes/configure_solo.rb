@@ -8,6 +8,6 @@
 #
 
 nginx_config "config" do
-  service_name "test"
-  action [:add, :configure_certs]
+  service_name "s3"
+  action [:add, :add_s3, :configure_certs]
 end
