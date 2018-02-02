@@ -8,5 +8,6 @@
 #
 
 nginx_config "config" do
-  action :add_solo
+  service_name "s3"
+  action [:add, :add_s3, :configure_certs]
 end

@@ -6,11 +6,9 @@
 
 include Nginx::Helper
 
-action :add_solo do
+action :add do
   begin
     user = new_resource.user
-    cdomain = new_resource.cdomain
-    routes = local_routes()
 
     yum_package "nginx" do
       action :upgrade
@@ -29,31 +27,6 @@ action :add_solo do
         mode 0755
         action :create
       end
-    end
-
-    # Create S3 certificate
-    json_cert = Chef::JSONCompat.parse(`rb_create_certs -a s3 -c #{cdomain}`)
-
-    template "/etc/nginx/ssl/s3.crt" do
-      source "cert.crt.erb"
-      owner user
-      group user
-      mode 0644
-      retries 2
-      cookbook "nginx"
-      variables(:crt => json_cert["s3_crt"])
-      action :create_if_missing
-    end
-
-    template "/etc/nginx/ssl/s3.key" do
-      source "cert.key.erb"
-      owner user
-      group user
-      mode 0644
-      retries 2
-      cookbook "nginx"
-      variables(:key => json_cert["s3_key"])
-      action :create_if_missing
     end
 
     # generate nginx config
@@ -75,108 +48,95 @@ action :add_solo do
     end
 
     Chef::Log.info("Nginx cookbook has been processed")
+  rescue => e
+   Chef::Log.error(e.message)
+  end
+
+end
+
+action :configure_certs do
+  begin
+    user = new_resource.user
+    cdomain = new_resource.cdomain
+    service_name = new_resource.service_name
+
+    json_cert = nginx_certs(service_name,cdomain)
+
+    template "/etc/nginx/ssl/#{service_name}.crt" do
+      source "cert.crt.erb"
+      owner user
+      group user
+      mode 0644
+      retries 2
+      cookbook "nginx"
+      not_if {json_cert.empty?}
+      variables(:crt => json_cert["#{service_name}_crt"])
+      action :create
+    end
+
+    template "/etc/nginx/ssl/#{service_name}.key" do
+      source "cert.key.erb"
+      owner user
+      group user
+      mode 0644
+      retries 2
+      cookbook "nginx"
+      not_if {json_cert.empty?}
+      variables(:key => json_cert["#{service_name}_key"])
+      action :create
+    end
+
+    Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
  rescue => e
    Chef::Log.error(e.message)
  end
 end
 
-action :add do
+action :add_s3 do #TODO: Create this resource in minio cookbook
   begin
+    s3_port = new_resource.s3_port
 
+    template "/etc/nginx/conf.d/s3.conf" do
+      source "s3.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:s3_port => s3_port)
+      notifies :restart, "service[nginx]"
+    end
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :add_webui do #TODO: Create this resource in webui cookbook
+  begin
     user = new_resource.user
     webui_port = new_resource.webui_port
     cdomain = new_resource.cdomain
     routes = local_routes()
 
-    yum_package "nginx" do
-      action :upgrade
-      flush_cache [:before]
+    template "/etc/nginx/conf.d/webui.conf" do
+      source "webui.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:webui_port => webui_port, :cdomain => cdomain)
+      notifies :restart, "service[nginx]"
     end
 
-    user user do
-      action :create
-      system true
+    template "/etc/nginx/conf.d/redirect.conf" do
+      source "redirect.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:routes => routes)
+      notifies :restart, "service[nginx]"
     end
-
-    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
-      directory path do
-        owner user
-        group user
-        mode 0755
-        action :create
-      end
-    end
-
-    nginx_cert_item = data_bag_item("certs","nginx") rescue nginx_cert_item = {}
-
-    unless nginx_cert_item.empty? or !check_webui_service
-      template "/etc/nginx/ssl/webui.crt" do
-        source "cert.crt.erb"
-        owner user
-        group user
-        mode 0640
-        retries 2
-        cookbook "nginx"
-        variables(:crt => nginx_cert_item["webui_crt"])
-      end
-
-      template "/etc/nginx/ssl/webui.key" do
-        source "cert.key.erb"
-        owner user
-        group user
-        mode 0640
-        retries 2
-        cookbook "nginx"
-        variables(:key => nginx_cert_item["webui_key"])
-      end
-
-      template "/etc/nginx/nginx.conf" do
-        source "nginx.conf.erb"
-        owner user
-        group user
-        mode 0644
-        cookbook "nginx"
-        variables(:user => user)
-        notifies :restart, "service[nginx]"
-      end
-
-      template "/etc/nginx/conf.d/webui.conf" do
-        source "webui.conf.erb"
-        owner user
-        group user
-        mode 0644
-        cookbook "nginx"
-        variables(:webui_port => webui_port, :cdomain => cdomain)
-        notifies :restart, "service[nginx]"
-      end
-
-      template "/etc/nginx/conf.d/redirect.conf" do
-        source "redirect.conf.erb"
-        owner user
-        group user
-        mode 0644
-        cookbook "nginx"
-        variables(:routes => routes)
-        notifies :restart, "service[nginx]"
-      end
-
-      service "nginx" do
-        service_name "nginx"
-        ignore_failure true
-        supports :status => true, :reload => true, :restart => true, :enable => true
-        action [:start, :enable]
-      end
-      node.default["nginx"]["up"] = true
-    else
-      service "nginx" do
-        service_name "nginx"
-        ignore_failure true
-        supports :status => true, :reload => true, :restart => true, :enable => true
-        action [:stop, :disable]
-      end
-    end
-
-     Chef::Log.info("Nginx cookbook has been processed")
+    Chef::Log.info("Nginx - Webui configuration has been processed successfully")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -192,17 +152,6 @@ action :remove do
       action [:stop, :disable]
     end
 
-    #%w[ /var/www/cache /var/log/nginx /etc/nginx ].each do |path|
-    #  directory path do
-    #    recursive true
-    #    action :delete
-    #  end
-    #end
-
-    #yum_package "nginx" do
-    #  action :remove
-    #end
-
     Chef::Log.info("Nginx cookbook has been processed")
   rescue => e
     Chef::Log.error(e.message)
@@ -211,7 +160,8 @@ end
 
 action :register do
   begin
-    if !node["nginx"]["registered"] and node["nginx"]["up"]
+    consul_servers = system('serf members -tag consul=ready | grep consul=ready &> /dev/null')
+    if !node["nginx"]["registered"] and consul_servers
       query = {}
       query["ID"] = "nginx-#{node["hostname"]}"
       query["Name"] = "nginx"
@@ -236,7 +186,8 @@ end
 
 action :deregister do
   begin
-    if node["nginx"]["registered"]
+    consul_servers = system('serf members -tag consul=ready | grep consul=ready &> /dev/null')
+    if node["nginx"]["registered"] and consul_servers
       execute 'Deregister service in consul' do
         command "curl http://localhost:8500/v1/agent/service/deregister/nginx-#{node["hostname"]} &>/dev/null"
         action :nothing

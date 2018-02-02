@@ -2,7 +2,7 @@
 # Cookbook Name:: nginx
 # Recipe:: default
 #
-# Copyright 2016, redborder
+# Copyright 2017, redborder
 #
 # All rights reserved - Do Not Redistribute
 #
