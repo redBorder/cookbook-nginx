@@ -47,5 +47,7 @@ esac
 %doc
 
 %changelog
+* Fri Jan 07 2022 David Vanhoucke <dvanhoucke@redborder.com> - 0.0.3-1
+- change register to consul
 * Tue Nov 14 2016 Juan J. Prieto <jjprieto@redborder.com> - 1.0.0-1
 - first spec version
