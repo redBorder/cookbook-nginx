@@ -142,6 +142,24 @@ action :add_webui do #TODO: Create this resource in webui cookbook
   end
 end
 
+action :add_http2k do #TODO: Create this resource in http2k cookbook
+begin
+  http2k_port = new_resource.http2k_port
+
+  template "/etc/nginx/conf.d/http2k.conf" do
+    source "http2k.conf.erb"
+    owner user
+    group user
+    mode 0644
+    cookbook "nginx"
+    variables(:http2k_port => http2k_port)
+    notifies :restart, "service[nginx]"
+  end
+rescue => e
+  Chef::Log.error(e.message)
+end
+end
+
 action :remove do
   begin
 
