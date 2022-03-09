@@ -87,9 +87,9 @@ action :configure_certs do
     end
 
     Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
- rescue => e
-   Chef::Log.error(e.message)
- end
+  rescue => e
+    Chef::Log.error(e.message)
+  end
 end
 
 action :add_s3 do #TODO: Create this resource in minio cookbook
@@ -108,56 +108,6 @@ action :add_s3 do #TODO: Create this resource in minio cookbook
   rescue => e
     Chef::Log.error(e.message)
   end
-end
-
-action :add_webui do #TODO: Create this resource in webui cookbook
-  begin
-    user = new_resource.user
-    webui_port = new_resource.webui_port
-    cdomain = new_resource.cdomain
-    routes = local_routes()
-
-    template "/etc/nginx/conf.d/webui.conf" do
-      source "webui.conf.erb"
-      owner user
-      group user
-      mode 0644
-      cookbook "nginx"
-      variables(:webui_port => webui_port, :cdomain => cdomain)
-      notifies :restart, "service[nginx]"
-    end
-
-    template "/etc/nginx/conf.d/redirect.conf" do
-      source "redirect.conf.erb"
-      owner user
-      group user
-      mode 0644
-      cookbook "nginx"
-      variables(:routes => routes)
-      notifies :restart, "service[nginx]"
-    end
-    Chef::Log.info("Nginx - Webui configuration has been processed successfully")
-  rescue => e
-    Chef::Log.error(e.message)
-  end
-end
-
-action :add_http2k do #TODO: Create this resource in http2k cookbook
-begin
-  http2k_port = new_resource.http2k_port
-
-  template "/etc/nginx/conf.d/http2k.conf" do
-    source "http2k.conf.erb"
-    owner user
-    group user
-    mode 0644
-    cookbook "nginx"
-    variables(:http2k_port => http2k_port)
-    notifies :restart, "service[nginx]"
-  end
-rescue => e
-  Chef::Log.error(e.message)
-end
 end
 
 action :remove do
