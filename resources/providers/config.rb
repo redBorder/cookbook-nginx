@@ -92,6 +92,24 @@ action :configure_certs do
   end
 end
 
+action :add_erchef do #TODO: Create this resource in minio cookbook
+  begin
+    erchef_port = new_resource.erchef_port
+
+    template "/etc/nginx/conf.d/erchef.conf" do
+      source "erchef.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:erchef_port => erchef_port)
+      notifies :restart, "service[nginx]"
+    end
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
 action :add_s3 do #TODO: Create this resource in minio cookbook
   begin
     s3_port = new_resource.s3_port
