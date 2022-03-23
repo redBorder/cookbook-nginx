@@ -92,7 +92,7 @@ action :configure_certs do
   end
 end
 
-action :add_erchef do #TODO: Create this resource in minio cookbook
+action :add_erchef do
   begin
     erchef_port = new_resource.erchef_port
 
