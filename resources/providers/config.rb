@@ -10,7 +10,7 @@ action :add do
   begin
     user = new_resource.user
 
-    yum_package "nginx" do
+    dnf_package "nginx" do
       action :upgrade
       flush_cache [:before]
     end
