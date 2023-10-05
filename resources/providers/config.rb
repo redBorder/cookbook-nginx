@@ -105,6 +105,14 @@ action :add_erchef do
       variables(:erchef_port => erchef_port)
       notifies :restart, "service[nginx]"
     end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:nothing]
+    end
+
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -123,6 +131,14 @@ action :add_s3 do #TODO: Create this resource in minio cookbook
       variables(:s3_port => s3_port)
       notifies :restart, "service[nginx]"
     end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:nothing]
+    end
+
   rescue => e
     Chef::Log.error(e.message)
   end
