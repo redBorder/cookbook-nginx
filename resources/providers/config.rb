@@ -21,7 +21,7 @@ action :add do
       not_if "getent passwd nginx"
     end
 
-    w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
+    %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
       directory path do
         owner user
         group user
