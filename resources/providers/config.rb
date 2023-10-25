@@ -179,7 +179,7 @@ action :register do
          action :nothing
       end.run_action(:run)
 
-      node.default["nginx"]["registered"] = true
+      node.normal["nginx"]["registered"] = true
       Chef::Log.info("Nginx service has been registered to consul")
     end
   rescue => e
@@ -196,7 +196,7 @@ action :deregister do
         action :nothing
       end.run_action(:run)
 
-      node.default["nginx"]["registered"] = false
+      node.normal["nginx"]["registered"] = false
       Chef::Log.info("Nginx service has been deregistered from consul")
     end
   rescue => e
