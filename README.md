@@ -4,7 +4,7 @@ cookbook to install and configure redborder nginx cookbook
 
 ### Platforms
 
-- Centos 7
+- Rocky Linux 9
 
 ### Chef
 

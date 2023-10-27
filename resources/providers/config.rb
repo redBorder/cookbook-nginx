@@ -10,14 +10,15 @@ action :add do
   begin
     user = new_resource.user
 
-    yum_package "nginx" do
+    dnf_package "nginx" do
       action :upgrade
       flush_cache [:before]
     end
 
-    user user do
-      action :create
-      system true
+    execute "create_user" do
+      command "/usr/sbin/useradd -r nginx"
+      ignore_failure true
+      not_if "getent passwd nginx"
     end
 
     %w[ /var/www /var/www/cache /var/log/nginx /etc/nginx/ssl /etc/nginx/conf.d ].each do |path|
@@ -105,6 +106,14 @@ action :add_erchef do
       variables(:erchef_port => erchef_port)
       notifies :restart, "service[nginx]"
     end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:nothing]
+    end
+
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -123,6 +132,14 @@ action :add_s3 do #TODO: Create this resource in minio cookbook
       variables(:s3_port => s3_port)
       notifies :restart, "service[nginx]"
     end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:nothing]
+    end
+
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -162,7 +179,7 @@ action :register do
          action :nothing
       end.run_action(:run)
 
-      node.set["nginx"]["registered"] = true
+      node.normal["nginx"]["registered"] = true
       Chef::Log.info("Nginx service has been registered to consul")
     end
   rescue => e
@@ -179,7 +196,7 @@ action :deregister do
         action :nothing
       end.run_action(:run)
 
-      node.set["nginx"]["registered"] = false
+      node.normal["nginx"]["registered"] = false
       Chef::Log.info("Nginx service has been deregistered from consul")
     end
   rescue => e

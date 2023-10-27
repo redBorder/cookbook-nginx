@@ -9,5 +9,5 @@
 
 nginx_config "config" do
   service_name "s3"
-  action [:add, :add_s3, :configure_certs]
+  action [:add, :configure_certs, :add_s3]
 end
