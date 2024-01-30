@@ -3,6 +3,12 @@ cookbook-nginx CHANGELOG
 
 This file is used to list changes made in each version of the nginx cookbook.
 
+0.0.7
+-----
+- [malvarez]
+  - Configure rb-aioutliers service 
+
+
 0.0.1
 -----
 - [cjmateos]
