@@ -145,6 +145,32 @@ action :add_s3 do #TODO: Create this resource in minio cookbook
   end
 end
 
+action :add_aioutliers do
+  begin
+    aioutliers_port = new_resource.aioutliers_port
+
+    template "/etc/nginx/conf.d/aioutliers.conf" do
+      source "aioutliers.conf.erb"
+      owner user
+      group user
+      mode 0644
+      cookbook "nginx"
+      variables(:aioutliers_port => aioutliers_port)
+      notifies :restart, "service[nginx]"
+    end
+
+    service "nginx" do
+      service_name "nginx"
+      ignore_failure true
+      supports :status => true, :reload => true, :restart => true, :enable => true
+      action [:nothing]
+    end
+
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
 action :remove do
   begin
 
