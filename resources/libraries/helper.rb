@@ -22,7 +22,7 @@ module Nginx
         cert.add_extension extension_factory.create_extension('subjectAltName', "DNS:rbookshelf.#{cn}", false)
         cert.add_extension extension_factory.create_extension('subjectAltName', "DNS:#{cn}", false)
       end
-      cert.sign key, OpenSSL::Digest::SHA1.new
+      cert.sign key, OpenSSL::Digest.new('SHA1')
       { key: key, crt: cert }
     end
 
