@@ -1,5 +1,19 @@
 cookbook-nginx CHANGELOG
-==========================
+===============
+
+## 0.0.8
+  - Miguel Negron
+    - [717936a] lint avoid use constants for OpenSSL
+    - [7d575d6] lint file.write instead of file.open
+    - [fc2b48b] lint resources 2
+    - [1862ff6] lint solo
+    - [4311a8a] lint providers 2
+    - [7720b9b] lint helper
+    - [b4fdc17] lint providers
+    - [b0618e1] lint resources
+    - [2b065d7] lint recipes
+    - [b12293f] lint attributes
+    - [42a9d18] Update metadata.rb
 
 This file is used to list changes made in each version of the nginx cookbook.
 
