@@ -49,7 +49,7 @@ module Nginx
           # Create S3 certificate
           ret_json = create_json_cert(app, cdomain)
           system('mkdir -p /var/chef/data/data_bag/certs')
-          File.open("/var/chef/data/data_bag/certs/#{app}.json", 'w') { |file| file.write(ret_json.to_json) }
+          File.write("/var/chef/data/data_bag/certs/#{app}.json", ret_json.to_json)
         end
         # Upload cert to data bag
         if File.exist?('/root/.chef/knife.rb')
