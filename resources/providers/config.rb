@@ -47,9 +47,8 @@ action :add do
 
     Chef::Log.info('Nginx cookbook has been processed')
   rescue => e
-   Chef::Log.error(e.message)
+    Chef::Log.error(e.message)
   end
-
 end
 
 action :configure_certs do
@@ -60,14 +59,14 @@ action :configure_certs do
 
     json_cert = nginx_certs(service_name, cdomain)
 
-    template '/etc/nginx/ssl/#{service_name}.crt' do
+    template "/etc/nginx/ssl/#{service_name}.crt" do
       source 'cert.crt.erb'
       owner user
       group user
       mode '0644'
       retries 2
       cookbook 'nginx'
-      not_if {json_cert.empty?}
+      not_if { json_cert.empty? }
       variables(crt: json_cert["#{service_name}_crt"])
       action :create
     end
@@ -79,12 +78,12 @@ action :configure_certs do
       mode '0644'
       retries 2
       cookbook 'nginx'
-      not_if {json_cert.empty?}
+      not_if { json_cert.empty? }
       variables(key: json_cert["#{service_name}_key"])
       action :create
     end
 
-    Chef::Log.info('Nginx cookbook - Certs for service #{service_name} has been processed')
+    Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -110,7 +109,6 @@ action :add_erchef do
       supports status: true, reload: true, restart: true, enable: true
       action [:nothing]
     end
-
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -136,7 +134,6 @@ action :add_s3 do # TODO: Create this resource in minio cookbook
       supports status: true, reload: true, restart: true, enable: true
       action [:nothing]
     end
-
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -162,7 +159,6 @@ action :add_aioutliers do
       supports status: true, reload: true, restart: true, enable: true
       action [:nothing]
     end
-
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -196,10 +192,10 @@ action :register do
       json_query = Chef::JSONCompat.to_json(query)
 
       execute 'Register service in consul' do
-         command "curl -X PUT http://localhost:8500/v1/agent/service/register -d '#{json_query}' &>/dev/null"
-         retries 3
-         retry_delay 2
-         action :nothing
+        command "curl -X PUT http://localhost:8500/v1/agent/service/register -d '#{json_query}' &>/dev/null"
+        retries 3
+        retry_delay 2
+        action :nothing
       end.run_action(:run)
 
       node.normal['nginx']['registered'] = true
