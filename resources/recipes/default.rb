@@ -1,12 +1,8 @@
-#
-# Cookbook Name:: nginx
+# Cookbook:: nginx
 # Recipe:: default
-#
-# Copyright 2017, redborder
-#
-# All rights reserved - Do Not Redistribute
-#
+# Copyright:: 2024, redborder
+# License:: Affero General Public License, Version 3
 
-nginx_config "config" do
+nginx_config 'config' do
   action :add
 end

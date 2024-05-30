@@ -1,2 +1,2 @@
-#Flags
-default["nginx"]["registered"] = false
+# Flags
+default['nginx']['registered'] = false
