@@ -92,14 +92,14 @@ end
 action :add_s3 do # Only for configure solo
   begin
     s3_port = new_resource.s3_port
-
+    s3_hosts = new_resource.s3_hosts
     template '/etc/nginx/conf.d/s3.conf' do
       source 's3.conf.erb'
       owner user
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(s3_port: s3_port)
+      variables(s3_hosts: s3_hosts, s3_port: s3_port)
       notifies :restart, 'service[nginx]'
     end
 
