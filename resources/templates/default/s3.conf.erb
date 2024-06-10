@@ -3,8 +3,9 @@
 #######################################################
 
 upstream s3 {
-    <% @s3_hosts.each do |server| %>
-    server <%= server %> weight=2 max_fails=3 fail_timeout=5s;
+    server <%= @s3_hosts.first %> max_fails=3 fail_timeout=5s;
+    <% @s3_hosts.drop(1).each do |server| %>
+    server <%= server %> backup max_fails=1 fail_timeout=10;
     <% end %>
 }
 
