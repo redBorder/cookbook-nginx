@@ -1,7 +1,7 @@
 # Cookbook:: nginx
 # Resource:: config
 
-actions :add, :add_s3, :add_erchef, :add_aioutliers, :configure_certs, :remove, :register, :deregister
+actions :add, :add_erchef, :add_aioutliers, :configure_certs, :remove, :register, :deregister
 default_action :add
 
 attribute :user, kind_of: String, default: 'nginx'
