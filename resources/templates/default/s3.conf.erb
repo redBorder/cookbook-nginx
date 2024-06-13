@@ -3,7 +3,10 @@
 #######################################################
 
 upstream s3 {
-    server localhost:<%= @s3_port %> weight=2 max_fails=3 fail_timeout=5s;
+    server <%= @s3_hosts.first %> max_fails=3 fail_timeout=5s;
+    <% @s3_hosts.drop(1).each do |server| %>
+    server <%= server %> backup max_fails=1 fail_timeout=10;
+    <% end %>
 }
 
 map $http_host $port_in_host {
