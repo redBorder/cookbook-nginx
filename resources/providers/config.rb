@@ -89,17 +89,17 @@ action :configure_certs do
   end
 end
 
-action :add_erchef do
+action :add_s3 do # Only for configure solo
   begin
-    erchef_port = new_resource.erchef_port
-
-    template '/etc/nginx/conf.d/erchef.conf' do
-      source 'erchef.conf.erb'
+    s3_port = new_resource.s3_port
+    s3_hosts = new_resource.s3_hosts
+    template '/etc/nginx/conf.d/s3.conf' do
+      source 's3.conf.erb'
       owner user
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(erchef_port: erchef_port)
+      variables(s3_hosts: s3_hosts, s3_port: s3_port)
       notifies :restart, 'service[nginx]'
     end
 
@@ -114,17 +114,17 @@ action :add_erchef do
   end
 end
 
-action :add_s3 do # TODO: Create this resource in minio cookbook
+action :add_erchef do
   begin
-    s3_port = new_resource.s3_port
+    erchef_port = new_resource.erchef_port
 
-    template '/etc/nginx/conf.d/s3.conf' do
-      source 's3.conf.erb'
+    template '/etc/nginx/conf.d/erchef.conf' do
+      source 'erchef.conf.erb'
       owner user
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(s3_port: s3_port)
+      variables(erchef_port: erchef_port)
       notifies :restart, 'service[nginx]'
     end
 
