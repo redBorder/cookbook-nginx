@@ -1,6 +1,18 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.0.0
+
+  - malvads
+    - [e5b2a9b] Fix lint
+    - [dd1b692] Update config.rb
+    - [ded1a47] Update s3.conf.erb
+    - [08dbca5] Add back s3
+    - [6880cbd] Remove add s3 from configure solo
+    - [95d5155] Configure Minio Load Balancer
+    - [dd1b692] Update config.rb
+    - [ded1a47] Update s3.conf.erb
+
 ## 0.0.8
   - Miguel Negron
     - [717936a] lint avoid use constants for OpenSSL
