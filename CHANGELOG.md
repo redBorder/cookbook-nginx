@@ -1,6 +1,13 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.0.1
+
+  - nilsver
+    - [17e55f0] Merge pull request #13 from redBorder/bugfix/18050_fix_ssl_cert_serial
+  - Miguel Alvarez
+    - [dfbf9d0] generate random 128 bit serial
+
 ## 1.0.0
 
   - malvads
