@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.0.1
+
+  - Miguel Alvarez
+    - [dfbf9d0] generate random 128 bit serial
+
 ## 1.0.0
 
   - malvads
