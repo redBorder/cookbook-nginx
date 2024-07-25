@@ -3,6 +3,7 @@ module Nginx
     require 'openssl'
     require 'resolv'
     require 'base64'
+    require 'securerandom'
 
     def create_cert(cn)
       # Return a hash with private key and certificate in x509 format
@@ -10,7 +11,7 @@ module Nginx
       name = OpenSSL::X509::Name.parse "CN=#{cn}/DC=redborder"
       cert = OpenSSL::X509::Certificate.new
       cert.version = 2
-      cert.serial = 0
+      cert.serial = SecureRandom.random_number(2**128)
       cert.not_before = Time.now
       cert.not_after = Time.now + (3600 * 24 * 365 * 10)
       cert.public_key = key.public_key
