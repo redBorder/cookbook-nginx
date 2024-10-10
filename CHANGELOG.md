@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.0.2
+
+  - Miguel Negrón
+    - [76275bf] Add pre and postun to clean the cookbook
+
 ## 1.0.1
 
   - Miguel Alvarez
@@ -19,7 +24,7 @@ cookbook-nginx CHANGELOG
     - [ded1a47] Update s3.conf.erb
 
 ## 0.0.8
-  - Miguel Negron
+  - Miguel Negrón
     - [717936a] lint avoid use constants for OpenSSL
     - [7d575d6] lint file.write instead of file.open
     - [fc2b48b] lint resources 2
