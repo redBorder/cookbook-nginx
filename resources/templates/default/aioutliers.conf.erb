@@ -3,7 +3,13 @@
 #######################################################
 
 upstream rb-aioutliers {
-    server localhost:<%= @aioutliers_port %> max_fails=3 fail_timeout=5s;
+  <% @aioutliers_hosts.each do |aioutliers_host| %>
+    <% if aioutliers_host  == "#{node['name']}.#{node['redborder']['cdomain']}" %>
+      server 127.0.0.1:<%= @aioutliers_port %> weight=6 max_fails=3 fail_timeout=5s;
+    <% else %>
+      server <%= aioutliers_host %>:<%= @aioutliers_port %> weight=4 max_fails=3 fail_timeout=120;
+    <% end%>
+  <% end %>
   }
 
 server {

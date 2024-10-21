@@ -3,7 +3,13 @@
 #######################################################
 
 upstream erchef {
-    server localhost:<%= @erchef_port %> weight=2 max_fails=3 fail_timeout=5s;
+   <% @erchef_hosts.each do |erchef_host| %>
+     <% if erchef_host  == "#{node['name']}.#{node['redborder']['cdomain']}" %>
+       server 127.0.0.1:<%= @erchef_port %> weight=6 max_fails=3 fail_timeout=5s;
+     <% else %>
+       server <%= erchef_host %>:<%= @erchef_port %> weight=4 max_fails=3 fail_timeout=120;
+     <% end %>
+    <% end %>
   }
 
 server {

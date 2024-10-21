@@ -116,6 +116,7 @@ end
 
 action :add_erchef do
   begin
+    erchef_hosts = new_resource.erchef_hosts
     erchef_port = new_resource.erchef_port
 
     template '/etc/nginx/conf.d/erchef.conf' do
@@ -124,7 +125,7 @@ action :add_erchef do
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(erchef_port: erchef_port)
+      variables(erchef_hosts: erchef_hosts, erchef_port: erchef_port)
       notifies :restart, 'service[nginx]'
     end
 
@@ -141,6 +142,7 @@ end
 
 action :add_aioutliers do
   begin
+    aioutliers_hosts = new_resource.aioutliers_hosts
     aioutliers_port = new_resource.aioutliers_port
 
     template '/etc/nginx/conf.d/aioutliers.conf' do
@@ -149,7 +151,7 @@ action :add_aioutliers do
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(aioutliers_port: aioutliers_port)
+      variables(aioutliers_hosts: aioutliers_hosts, aioutliers_port: aioutliers_port)
       notifies :restart, 'service[nginx]'
     end
 
