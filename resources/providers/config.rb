@@ -89,10 +89,38 @@ action :configure_certs do
   end
 end
 
+action :add_http2k do
+  begin
+    http2k_hosts = new_resource.http2k_hosts
+    http2k_port = new_resource.http2k_port
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    template '/etc/nginx/conf.d/http2k.conf' do
+      source 'http2k.conf.erb'
+      owner 'nginx'
+      group 'nginx'
+      mode '0644'
+      cookbook 'nginx'
+      variables(http2k_hosts: http2k_hosts, http2k_port: http2k_port)
+      notifies :restart, 'service[nginx]'
+    end
+
+    Chef::Log.info('nginx http2k configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
 action :add_s3 do # Only for configure solo
   begin
     s3_port = new_resource.s3_port
     s3_hosts = new_resource.s3_hosts
+
     template '/etc/nginx/conf.d/s3.conf' do
       source 's3.conf.erb'
       owner user
@@ -177,6 +205,46 @@ action :remove do
     end
 
     Chef::Log.info('Nginx cookbook has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :remove_http2k do
+  begin
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    file '/etc/nginx/conf.d/http2k.conf' do
+      action :delete
+      notifies :restart, 'service[nginx]'
+    end
+
+    Chef::Log.info('nginx http2k configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :remove_aioutliers do
+  begin
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    file '/etc/nginx/conf.d/aioutliers.conf' do
+      action :delete
+      notifies :restart, 'service[nginx]'
+    end
+
+    Chef::Log.info('nginx aioutliers configuration has been processed')
   rescue => e
     Chef::Log.error(e.message)
   end
