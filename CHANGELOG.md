@@ -1,6 +1,16 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.2.0
+
+  - Miguel Negrón
+    - [4435c11] Merge pull request #15 from redBorder/bugfix/#19144_missing_nginx_confd_files
+  - David Vanhoucke
+    - [524bf9d] remove files if service disabled
+  - Miguel Negron
+    - [fcbbde2] erchef_hosts
+    - [26ab787] Add balancing
+
 ## 1.0.2
 
   - Miguel Negrón
