@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.2.1
+
+  - nilsver
+    - [42b410b] add user in relevant action blocks
+
 ## 1.2.0
 
   - Miguel Negrón
