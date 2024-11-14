@@ -91,6 +91,7 @@ end
 
 action :add_http2k do
   begin
+    user = new_resource.user
     http2k_hosts = new_resource.http2k_hosts
     http2k_port = new_resource.http2k_port
 
@@ -102,8 +103,8 @@ action :add_http2k do
 
     template '/etc/nginx/conf.d/http2k.conf' do
       source 'http2k.conf.erb'
-      owner 'nginx'
-      group 'nginx'
+      owner user
+      group user
       mode '0644'
       cookbook 'nginx'
       variables(http2k_hosts: http2k_hosts, http2k_port: http2k_port)
@@ -118,6 +119,7 @@ end
 
 action :add_s3 do # Only for configure solo
   begin
+    user = new_resource.user
     s3_port = new_resource.s3_port
     s3_hosts = new_resource.s3_hosts
 
@@ -144,6 +146,7 @@ end
 
 action :add_erchef do
   begin
+    user = new_resource.user
     erchef_hosts = new_resource.erchef_hosts
     erchef_port = new_resource.erchef_port
 
@@ -170,6 +173,7 @@ end
 
 action :add_aioutliers do
   begin
+    user = new_resource.user
     aioutliers_hosts = new_resource.aioutliers_hosts
     aioutliers_port = new_resource.aioutliers_port
 
