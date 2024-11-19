@@ -22,7 +22,7 @@ server {
 
     client_max_body_size 512m;
 
-    location /api/v1/outliers {
+    location /api/v1/ {
         proxy_pass http://rb-aioutliers;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
