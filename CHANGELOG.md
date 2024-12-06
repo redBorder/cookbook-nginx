@@ -1,6 +1,13 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.2.2
+
+  - Miguel Negrón
+    - [0fcac9d] Merge pull request #19 from redBorder/feature/18969_ip_identifier
+  - Miguel Alvarez
+    - [dda2601] Allow all requests on outliers api
+
 ## 1.2.1
 
   - nilsver
