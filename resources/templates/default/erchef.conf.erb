@@ -46,4 +46,26 @@ server {
       proxy_redirect https://erchef /;
       proxy_pass https://erchef;
     }
+
+    location ~^(/organizations\/redborder)/(nodes$|nodes/|roles$|roles/) {
+      set $rbcondition  "";
+      if ($http_x_ops_userid != "") {
+          set $rbcondition  "X";
+      }
+      set $netsync_condition "";
+      if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbgateway|rbcp|rbproxy|rbexporter)) {
+          set $netsync_condition "S";
+      }
+      if ($rbcondition = X) {
+          set $my_upstream webui;
+      }
+      if ($rbcondition = S) {
+          set $my_upstream erchef;
+      }
+      if ($rbcondition = "") {
+          return 403;
+      }
+      proxy_redirect http://$my_upstream /;
+      proxy_pass http://$my_upstream;
+    }
   }
