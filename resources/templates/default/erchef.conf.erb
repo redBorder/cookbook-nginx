@@ -53,7 +53,7 @@ server {
       if ($http_x_ops_userid != "") {
           set $rbcondition  "X";
       }
-      if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbgateway|rbcp|rbproxy|rbexporter)) {
+      if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbproxy)) {
           set $netsync_condition "S";
       }
       if ($http_user_agent ~* "Knife") {
