@@ -49,23 +49,29 @@ server {
 
     location ~^(/organizations\/redborder)/(nodes$|nodes/|roles$|roles/) {
       set $rbcondition  "";
+      set $netsync_condition "";
       if ($http_x_ops_userid != "") {
           set $rbcondition  "X";
       }
-      set $netsync_condition "";
       if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbgateway|rbcp|rbproxy|rbexporter)) {
           set $netsync_condition "S";
       }
+      if ($http_user_agent ~* "Knife") {
+        set $rbcondition  "${rbcondition}R";
+      }
+      if ($rbcondition = XR) {
+          set $my_upstream http://webui;
+      }
       if ($rbcondition = X) {
-          set $my_upstream webui;
+          set $my_upstream https://erchef;
       }
       if ($rbcondition = S) {
-          set $my_upstream erchef;
+          set $my_upstream https://erchef;
       }
       if ($rbcondition = "") {
           return 403;
       }
-      proxy_redirect http://$my_upstream /;
-      proxy_pass http://$my_upstream;
+      proxy_redirect $my_upstream /;
+      proxy_pass $my_upstream;
     }
   }
