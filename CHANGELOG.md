@@ -1,6 +1,13 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.2.3
+
+  - Pablo Torres
+    - [a05ef5b] Bugfix #18588: Only redirect to webui if it is a proxy or a ips
+    - [000ccab] Bugfix #18588: Only redirect to webui if the command executed is Knife
+    - [4b140b3] Bugfix #18588: Change nginx to redirect to webui
+
 ## 1.2.2
 
   - Miguel Negrón
