@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.0
+
+  - Rafael Gomez
+    - [7284fcf] Fix server_name configuration in http2k.conf.erb to correctly reference the domain
+
 ## 1.2.3
 
   - Pablo Torres
