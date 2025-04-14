@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 2.0.0
+
+  - nilsver
+    - [b52cbf2] listen to correct host
+
 ## 1.2.3
 
   - Pablo Torres
