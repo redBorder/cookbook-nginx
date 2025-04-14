@@ -16,7 +16,7 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    server_name http2k.<%= node['redborder']['cdomain'] %> http2k.service.<%= node['redborder']['cdomain'] %>;
+    server_name http2k.service. .http2k.service;
 
     ssl_certificate /etc/nginx/ssl/http2k.crt;
     ssl_certificate_key /etc/nginx/ssl/http2k.key;
