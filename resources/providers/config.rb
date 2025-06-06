@@ -54,8 +54,8 @@ end
 action :configure_certs do
   begin
     user = new_resource.user
-    cdomain = new_resource.cdomain
     service_name = new_resource.service_name
+    cdomain = get_cdomain
 
     json_cert = nginx_certs(service_name, cdomain)
 

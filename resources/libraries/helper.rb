@@ -67,7 +67,13 @@ module Nginx
     # This function will be used to get the cdomain for the action add_s3,
     # which is only executed early in installation, where node is not available yet.
     def get_cdomain
-      File.exist?('/etc/redborder/cdomain') ? File.read('/etc/redborder/cdomain').strip : 'redborder.cluster'
+      if node.dig('redborder', 'cdomain')
+        node['redborder']['cdomain']
+      elsif File.exist?('/etc/redborder/cdomain')
+        File.read('/etc/redborder/cdomain').strip
+      else
+        'redborder.cluster'
+      end
     end
   end
 end
