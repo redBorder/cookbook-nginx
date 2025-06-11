@@ -54,8 +54,8 @@ end
 action :configure_certs do
   begin
     user = new_resource.user
-    cdomain = new_resource.cdomain
     service_name = new_resource.service_name
+    cdomain = get_cdomain
 
     json_cert = nginx_certs(service_name, cdomain)
 
@@ -122,6 +122,7 @@ action :add_s3 do # Only for configure solo
     user = new_resource.user
     s3_port = new_resource.s3_port
     s3_hosts = new_resource.s3_hosts
+    cdomain = get_cdomain
 
     template '/etc/nginx/conf.d/s3.conf' do
       source 's3.conf.erb'
@@ -129,7 +130,7 @@ action :add_s3 do # Only for configure solo
       group user
       mode '0644'
       cookbook 'nginx'
-      variables(s3_hosts: s3_hosts, s3_port: s3_port)
+      variables(s3_hosts: s3_hosts, s3_port: s3_port, cdomain: cdomain)
       notifies :restart, 'service[nginx]'
     end
 

@@ -1,6 +1,14 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.2
+
+  - nilsver
+    - [a84ef3a] get cdomain for first chef solo run
+    - [e463207] fix bug upon installation with add_s3
+    - [6458bb8] add erchef and s3 cdomain
+    - [1cba240] add erchef.service.cdomain
+
 ## 1.3.1
 
   - Rafael Gomez
