@@ -9,7 +9,6 @@ action :add do
 
     dnf_package 'nginx' do
       action :upgrade
-      flush_cache [:before]
     end
 
     execute 'create_user' do
