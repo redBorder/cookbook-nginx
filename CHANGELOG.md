@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.3
+
+  - nilsver
+    - [06b08f6] remove flush cache
+
 ## 1.3.2
 
   - nilsver
