@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.4
+
+  - jnavarrorb
+    - [1458019] Remove executable permissions on non-executable files
+
 ## 1.3.3
 
   - nilsver
