@@ -18,7 +18,7 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    server_name s3.service. .s3.service s3.service.<%= @cdomain %>;
+    server_name s3.service. .s3.service s3.service.<%= @cdomain %> malware.s3.service. .malware.s3.service malware.s3.service.<%= @cdomain %>;
 
     ssl_certificate /etc/nginx/ssl/s3.crt;
     ssl_certificate_key /etc/nginx/ssl/s3.key;
