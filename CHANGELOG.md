@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.5
+
+  - Pablo Pérez
+    - [6febb87] add malware endpoint
+
 ## 1.3.4
 
   - jnavarrorb
