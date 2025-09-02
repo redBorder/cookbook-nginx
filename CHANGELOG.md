@@ -3,8 +3,6 @@ cookbook-nginx CHANGELOG
 
 ## 1.3.5
 
-  - Daniel Castro
-    - [7ba6b9b] Merge pull request #37 from redBorder/feature/#22453_create_s3_malware_bucket
   - Pablo Pérez
     - [6febb87] add malware endpoint
 
