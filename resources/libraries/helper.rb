@@ -8,7 +8,7 @@ module Nginx
     def create_cert(cn)
       # Return a hash with private key and certificate in x509 format
       key = OpenSSL::PKey::RSA.new 4096
-      name = OpenSSL::X509::Name.parse "CN=#{cn}/DC=redborder"
+      name = OpenSSL::X509::Name.parse("CN=#{cn}")
       cert = OpenSSL::X509::Certificate.new
       cert.version = 2
       cert.serial = SecureRandom.random_number(2**128)
@@ -18,10 +18,17 @@ module Nginx
       cert.subject = name
       cert.issuer = name
       if cn.start_with?('s3.')
-        extension_factory = OpenSSL::X509::ExtensionFactory.new nil, cert
-        cert.add_extension extension_factory.create_extension('subjectAltName', "DNS:redborder.#{cn}", false)
-        cert.add_extension extension_factory.create_extension('subjectAltName', "DNS:rbookshelf.#{cn}", false)
-        cert.add_extension extension_factory.create_extension('subjectAltName', "DNS:#{cn}", false)
+        san_list = [
+          "DNS:redborder.#{cn}",
+          "DNS:rbookshelf.#{cn}",
+          "DNS:malware.#{cn}",
+          "DNS:#{cn.sub('s3', 's3.service')}",
+          "DNS:#{cn}",
+        ].join(',')
+        extension_factory = OpenSSL::X509::ExtensionFactory.new
+        extension_factory.subject_certificate = cert
+        extension_factory.issuer_certificate = cert
+        cert.add_extension(extension_factory.create_extension('subjectAltName', san_list, false))
       end
       cert.sign key, OpenSSL::Digest.new('SHA1')
       { key: key, crt: cert }
