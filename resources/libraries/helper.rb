@@ -7,6 +7,7 @@ module Nginx
 
     def create_cert(cn)
       # Return a hash with private key and certificate in x509 format
+      # Certificates only for s3
       key = OpenSSL::PKey::RSA.new 4096
       name = OpenSSL::X509::Name.parse("CN=#{cn}")
       cert = OpenSSL::X509::Certificate.new

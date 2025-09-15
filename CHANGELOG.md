@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.6
+
+  - manegron
+    - [2d32cca] Adapt helper.rb to create certificates
+
 ## 1.3.5
 
   - Pablo Pérez
