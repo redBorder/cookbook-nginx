@@ -47,13 +47,20 @@ server {
       proxy_pass https://erchef;
     }
 
+    location ~^/organizations/redborder/data/passwords {
+      if ($http_x_ops_userid ~* "(rbips|rbipsv2|rbipscp|rbintrusion)") {
+        return 403;
+      }
+      proxy_pass https://erchef;
+    }
+
     location ~^(/organizations\/redborder)/(nodes$|nodes/|roles$|roles/) {
       set $rbcondition  "";
       set $netsync_condition "";
       if ($http_x_ops_userid != "") {
           set $rbcondition  "X";
       }
-      if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbproxy)) {
+      if ($http_x_ops_userid !~* (rbips|rbipsv2|rbipscp|rbproxy|rbintrusion) ) {
           set $netsync_condition "S";
       }
       if ($http_user_agent ~* "Knife") {
