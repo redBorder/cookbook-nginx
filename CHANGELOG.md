@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.7
+
+  - nilsver
+    - [1d8013c] restrict access to passwords databag
+
 ## 1.3.6
 
   - manegron
