@@ -47,13 +47,6 @@ server {
       proxy_pass https://erchef;
     }
 
-    location ~^/organizations/redborder/data/passwords {
-      if ($http_x_ops_userid ~* "(rbips|rbipsv2|rbipscp|rbintrusion)") {
-        return 403;
-      }
-      proxy_pass https://erchef;
-    }
-
     location ~^(/organizations\/redborder)/(nodes$|nodes/|roles$|roles/) {
       set $rbcondition  "";
       set $netsync_condition "";

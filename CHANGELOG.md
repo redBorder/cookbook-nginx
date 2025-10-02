@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.3.8
+
+  - manegron
+    - [19a3126] Undo 97cd0c1a4514638b2ec99b6a54d5f701e8c72c02
+
 ## 1.3.7
 
   - nilsver
