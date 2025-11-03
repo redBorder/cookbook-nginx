@@ -68,6 +68,7 @@ action :configure_certs do
       not_if { json_cert.empty? }
       variables(crt: json_cert["#{service_name}_crt"])
       action :create
+      notifies :restart, 'service[nginx]', :delayed
     end
 
     template "/etc/nginx/ssl/#{service_name}.key" do
@@ -80,6 +81,7 @@ action :configure_certs do
       not_if { json_cert.empty? }
       variables(key: json_cert["#{service_name}_key"])
       action :create
+      notifies :restart, 'service[nginx]', :delayed
     end
 
     Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")

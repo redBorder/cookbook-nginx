@@ -31,7 +31,7 @@ module Nginx
         extension_factory.issuer_certificate = cert
         cert.add_extension(extension_factory.create_extension('subjectAltName', san_list, false))
       end
-      cert.sign key, OpenSSL::Digest.new('SHA1')
+      cert.sign key, OpenSSL::Digest.new('SHA256')
       { key: key, crt: cert }
     end
 
