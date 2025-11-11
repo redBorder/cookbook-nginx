@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.4.0
+
+  - Rafael Gomez
+    - [94f815c] Use SHA512 to generate certs
+
 ## 1.3.8
 
   - manegron
