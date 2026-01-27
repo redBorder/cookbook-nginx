@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.4.1
+
+  - manegron
+    - [8b44897] Handle knife access using acls instead of webui
+
 ## 1.4.0
 
   - Rafael Gomez
