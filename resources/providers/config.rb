@@ -198,6 +198,75 @@ action :add_aioutliers do
   end
 end
 
+action :add_hub do
+  begin
+    user = new_resource.user
+    hub_hosts = new_resource.hub_hosts
+    hub_port = new_resource.hub_port
+    weight_local = new_resource.weight_local
+    max_fails_local = new_resource.max_fails_local
+    fail_timeout_local = new_resource.fail_timeout_local
+    weight = new_resource.weight
+    max_fails = new_resource.max_fails
+    fail_timeout = new_resource.fail_timeout
+
+    # Dynamically build the list of upstreams
+    upstream_servers = []
+
+    local_hub_fqdn = "#{node['hostname']}.#{node['redborder']['cdomain']}"
+
+    hub_hosts.each do |hub_hostname|
+      if hub_hostname == local_hub_fqdn
+        upstream_servers << {
+          address: "127.0.0.1:#{hub_port}",
+          weight: weight_local,
+          max_fails: max_fails_local,
+          fail_timeout: fail_timeout_local
+        }
+      else
+        upstream_servers << {
+          address: "#{hub_hostname}:#{hub_port}",
+          weight: weight,
+          max_fails: max_fails,
+          fail_timeout: fail_timeout
+        }
+      end
+    end
+
+    # Safety fallback: use localhost
+    if upstream_servers.empty?
+      upstream_servers = [
+        { address: "127.0.0.1:#{hub_port}", weight: weight_local, max_fails: max_fails_local, fail_timeout: fail_timeout_local }
+      ]
+    end
+
+    template '/etc/nginx/conf.d/redborder-hub.conf' do
+      source 'redborder-hub.conf.erb'
+      owner user
+      group user
+      mode '0644'
+      cookbook 'nginx'
+      variables(
+        ssl_cert: "/etc/nginx/ssl/#{new_resource.service_name}.crt",
+        ssl_key: "/etc/nginx/ssl/#{new_resource.service_name}.key",
+        upstreams: upstream_servers,
+        ws_timeout: '70s'
+      )
+      notifies :restart, 'service[nginx]'
+    end
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    Chef::Log.info('nginx redborder-hub configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
 action :remove do
   begin
 
@@ -249,6 +318,26 @@ action :remove_aioutliers do
     end
 
     Chef::Log.info('nginx aioutliers configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :remove_hub do
+  begin
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    file '/etc/nginx/conf.d/redborder-hub.conf' do
+      action :delete
+      notifies :restart, 'service[nginx]'
+    end
+
+    Chef::Log.info('nginx redborder-hub configuration has been processed')
   rescue => e
     Chef::Log.error(e.message)
   end
