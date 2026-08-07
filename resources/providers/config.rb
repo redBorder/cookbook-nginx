@@ -217,20 +217,20 @@ action :add_hub do
 
     hub_hosts.each do |hub_hostname|
       upstream = if hub_hostname == local_hub
-                  {
-                    address: "127.0.0.1:#{hub_port}",
-                    weight: weight_local,
-                    max_fails: max_fails_local,
-                    fail_timeout: fail_timeout_local,
-                  }
-                else
-                  {
-                    address: "#{hub_hostname}:#{hub_port}",
-                    weight: weight,
-                    max_fails: max_fails,
-                    fail_timeout: fail_timeout,
-                  }
-                end
+                    {
+                      address: "127.0.0.1:#{hub_port}",
+                      weight: weight_local,
+                      max_fails: max_fails_local,
+                      fail_timeout: fail_timeout_local,
+                    }
+                  else
+                    {
+                      address: "#{hub_hostname}:#{hub_port}",
+                      weight: weight,
+                      max_fails: max_fails,
+                      fail_timeout: fail_timeout,
+                    }
+                  end
 
       upstream_servers << upstream
     end
