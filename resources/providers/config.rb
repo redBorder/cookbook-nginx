@@ -213,22 +213,22 @@ action :add_hub do
     # Dynamically build the list of upstreams
     upstream_servers = []
 
-    local_hub_fqdn = "#{node['hostname']}.#{node['redborder']['cdomain']}"
+    local_hub = "#{node['hostname']}.#{node['redborder']['cdomain']}"
 
     hub_hosts.each do |hub_hostname|
-      if hub_hostname == local_hub_fqdn
+      if hub_hostname == local_hub
         upstream_servers << {
           address: "127.0.0.1:#{hub_port}",
           weight: weight_local,
           max_fails: max_fails_local,
-          fail_timeout: fail_timeout_local
+          fail_timeout: fail_timeout_local,
         }
       else
         upstream_servers << {
           address: "#{hub_hostname}:#{hub_port}",
           weight: weight,
           max_fails: max_fails,
-          fail_timeout: fail_timeout
+          fail_timeout: fail_timeout,
         }
       end
     end
@@ -236,7 +236,12 @@ action :add_hub do
     # Safety fallback: use localhost
     if upstream_servers.empty?
       upstream_servers = [
-        { address: "127.0.0.1:#{hub_port}", weight: weight_local, max_fails: max_fails_local, fail_timeout: fail_timeout_local }
+        {
+          address: "127.0.0.1:#{hub_port}",
+          weight: weight_local,
+          max_fails: max_fails_local,
+          fail_timeout: fail_timeout_local,
+        },
       ]
     end
 
