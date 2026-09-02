@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.5.0
+
+  - vimesa
+    - [84d994e] Add a hub to the Nginx configuration
+
 ## 1.4.1
 
   - manegron
