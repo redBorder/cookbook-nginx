@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.6.0
+
+  - Nils
+    - [63f0733] fix bug if redborder-hub was down on 1 node
+
 ## 1.5.0
 
   - vimesa
