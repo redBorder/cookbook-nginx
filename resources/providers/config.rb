@@ -214,23 +214,26 @@ action :add_hub do
     upstream_servers = []
 
     local_hub = "#{node['hostname']}.#{node['redborder']['cdomain']}"
+    hub_local_active = new_resource.hub_local_active
 
     hub_hosts.each do |hub_hostname|
-      upstream = if hub_hostname == local_hub
-                   {
-                     address: "127.0.0.1:#{hub_port}",
-                     weight: weight_local,
-                     max_fails: max_fails_local,
-                     fail_timeout: fail_timeout_local,
-                   }
-                 else
-                   {
-                     address: "#{hub_hostname}:#{hub_port}",
-                     weight: weight,
-                     max_fails: max_fails,
-                     fail_timeout: fail_timeout,
-                   }
-                 end
+      if hub_hostname == local_hub
+        next unless hub_local_active
+
+        upstream = {
+          address: "127.0.0.1:#{hub_port}",
+          weight: weight_local,
+          max_fails: max_fails_local,
+          fail_timeout: fail_timeout_local,
+        }
+      else
+        upstream = {
+          address: "#{hub_hostname}:#{hub_port}",
+          weight: weight,
+          max_fails: max_fails,
+          fail_timeout: fail_timeout,
+        }
+      end
 
       upstream_servers << upstream
     end

@@ -17,6 +17,7 @@ attribute :cdomain, kind_of: String, default: 'redborder.cluster'
 attribute :service_name, kind_of: String
 attribute :hub_port, kind_of: Integer, default: 8010
 attribute :hub_hosts, kind_of: Array
+attribute :hub_local_active, kind_of: [TrueClass, FalseClass], default: true
 attribute :weight_local, kind_of: Integer, default: 6
 attribute :max_fails_local, kind_of: Integer, default: 3
 attribute :fail_timeout_local, kind_of: Integer, default: 5
