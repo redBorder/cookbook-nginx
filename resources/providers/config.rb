@@ -267,11 +267,95 @@ action :add_hub do
 
     service 'nginx' do
       service_name 'nginx'
+      ignore_failure true
       supports status: true, reload: true, restart: true, start: true, enable: true
       action :nothing
     end
 
     Chef::Log.info('nginx redborder-hub configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :add_grr do
+  begin
+    user = new_resource.user
+    grr_hosts = new_resource.grr_hosts
+    grr_port = new_resource.grr_port
+    weight_local = new_resource.weight_local
+    max_fails_local = new_resource.max_fails_local
+    fail_timeout_local = new_resource.fail_timeout_local
+    weight = new_resource.weight
+    max_fails = new_resource.max_fails
+    fail_timeout = new_resource.fail_timeout
+
+    upstream_servers = []
+
+    local_grr = "#{node['hostname']}.#{node['redborder']['cdomain']}"
+    grr_local_active = new_resource.grr_local_active
+
+    grr_hosts.each do |grr_hostname|
+      if grr_hostname == local_grr
+        next unless grr_local_active
+
+        upstream = {
+          address: "127.0.0.1:#{grr_port}",
+          weight: weight_local,
+          max_fails: max_fails_local,
+          fail_timeout: fail_timeout_local,
+        }
+      else
+        upstream = {
+          address: "#{grr_hostname}:#{grr_port}",
+          weight: weight,
+          max_fails: max_fails,
+          fail_timeout: fail_timeout,
+        }
+      end
+
+      upstream_servers << upstream
+    end
+
+    if upstream_servers.empty?
+      upstream_servers = [
+        {
+          address: "127.0.0.1:#{grr_port}",
+          weight: weight_local,
+          max_fails: max_fails_local,
+          fail_timeout: fail_timeout_local,
+        },
+      ]
+    end
+
+    execute 'allow_nginx_grr_port' do
+      command "semanage port -a -t http_port_t -p tcp #{grr_port}"
+      not_if "semanage port -l | grep -w http_port_t | grep -qw #{grr_port}"
+      only_if 'command -v semanage && getenforce | grep -qi enforcing'
+    end
+
+    template '/etc/nginx/conf.d/grr.conf' do
+      source 'grr.conf.erb'
+      owner user
+      group user
+      mode '0644'
+      cookbook 'nginx'
+      variables(
+        ssl_cert: "/etc/nginx/ssl/#{new_resource.service_name}.crt",
+        ssl_key: "/etc/nginx/ssl/#{new_resource.service_name}.key",
+        upstreams: upstream_servers
+      )
+      notifies :restart, 'service[nginx]'
+    end
+
+    service 'nginx' do
+      service_name 'nginx'
+      ignore_failure true
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    Chef::Log.info('nginx grr configuration has been processed')
   rescue => e
     Chef::Log.error(e.message)
   end
@@ -348,6 +432,26 @@ action :remove_hub do
     end
 
     Chef::Log.info('nginx redborder-hub configuration has been processed')
+  rescue => e
+    Chef::Log.error(e.message)
+  end
+end
+
+action :remove_grr do
+  begin
+
+    service 'nginx' do
+      service_name 'nginx'
+      supports status: true, reload: true, restart: true, start: true, enable: true
+      action :nothing
+    end
+
+    file '/etc/nginx/conf.d/grr.conf' do
+      action :delete
+      notifies :restart, 'service[nginx]'
+    end
+
+    Chef::Log.info('nginx grr configuration has been processed')
   rescue => e
     Chef::Log.error(e.message)
   end

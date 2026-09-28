@@ -1,7 +1,7 @@
 # Cookbook:: nginx
 # Resource:: config
 
-actions :add, :add_http2k, :add_s3, :add_erchef, :add_aioutliers, :add_hub, :configure_certs, :remove_http2k, :remove_aioutliers, :remove_hub, :remove, :register, :deregister
+actions :add, :add_http2k, :add_s3, :add_erchef, :add_aioutliers, :add_hub, :add_grr, :configure_certs, :remove_http2k, :remove_aioutliers, :remove_hub, :remove_grr, :remove, :register, :deregister
 default_action :add
 
 attribute :user, kind_of: String, default: 'nginx'
@@ -24,3 +24,6 @@ attribute :fail_timeout_local, kind_of: Integer, default: 5
 attribute :weight, kind_of: Integer, default: 4
 attribute :max_fails, kind_of: Integer, default: 3
 attribute :fail_timeout, kind_of: Integer, default: 120
+attribute :grr_port, kind_of: Integer, default: 8002
+attribute :grr_hosts, kind_of: Array
+attribute :grr_local_active, kind_of: [TrueClass, FalseClass], default: true
