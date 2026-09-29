@@ -34,7 +34,8 @@ http {
   	gzip_http_version 1.0;
   	gzip_comp_level 2;
 	gzip_proxied any;
-  	gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript application/json;
+  	gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript application/json image/svg+xml;
+	gzip_vary on;
 
     proxy_cache_path /var/www/cache levels=1:2 keys_zone=webui-cache:50m max_size=5000m inactive=600m;
     proxy_temp_path /tmp/nginx;
