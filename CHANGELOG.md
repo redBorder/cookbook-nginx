@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.7.1
+
+  - manegron
+    - [da76ca6] Upload cookbook only if opscode-erchef is active
+
 ## 1.7.0
 
   - Miguel Negrón
