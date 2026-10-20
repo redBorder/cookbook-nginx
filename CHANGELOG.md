@@ -1,6 +1,19 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.7.1
+
+  - manegron
+    - [da76ca6] Upload cookbook only if opscode-erchef is active
+
+## 1.7.0
+
+  - Miguel Negrón
+    - [ae35e11] Merge pull request #51 from redBorder/improvement/#26722_improve_webui_performance
+  - manegron
+    - [ae35e11] Merge pull request #51 from redBorder/improvement/#26722_improve_webui_performance
+    - [e051d11] Optimize cache javascript of webui
+
 ## 1.6.0
 
   - Nils
