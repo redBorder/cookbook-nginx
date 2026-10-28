@@ -25,5 +25,5 @@ attribute :weight, kind_of: Integer, default: 4
 attribute :max_fails, kind_of: Integer, default: 3
 attribute :fail_timeout, kind_of: Integer, default: 120
 attribute :grr_port, kind_of: Integer, default: 8002
-attribute :grr_hosts, kind_of: Array
+attribute :grr_adminui_hosts, kind_of: Array
 attribute :grr_local_active, kind_of: [TrueClass, FalseClass], default: true

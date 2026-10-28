@@ -281,7 +281,7 @@ end
 action :add_grr do
   begin
     user = new_resource.user
-    grr_hosts = new_resource.grr_hosts
+    grr_adminui_hosts = new_resource.grr_adminui_hosts
     grr_port = new_resource.grr_port
     weight_local = new_resource.weight_local
     max_fails_local = new_resource.max_fails_local
@@ -295,7 +295,7 @@ action :add_grr do
     local_grr = "#{node['hostname']}.#{node['redborder']['cdomain']}"
     grr_local_active = new_resource.grr_local_active
 
-    grr_hosts.each do |grr_hostname|
+    grr_adminui_hosts.each do |grr_hostname|
       if grr_hostname == local_grr
         next unless grr_local_active
 
