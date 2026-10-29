@@ -267,7 +267,6 @@ action :add_hub do
 
     service 'nginx' do
       service_name 'nginx'
-      ignore_failure true
       supports status: true, reload: true, restart: true, start: true, enable: true
       action :nothing
     end
