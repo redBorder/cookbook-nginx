@@ -4,6 +4,7 @@ module Nginx
     require 'resolv'
     require 'base64'
     require 'securerandom'
+    require 'fileutils'
 
     def create_cert(cn)
       # Return a hash with private key and certificate in x509 format
@@ -43,7 +44,11 @@ module Nginx
       ret_json
     end
 
-    def nginx_certs(app, cdomain)
+    # openbao: the private key never goes to disk or the data bag; it is seeded into OpenBao and
+    # rendered by the agent into /run/rb-secrets/nginx/<app>.key (returned hash has no <app>_key)
+    def nginx_certs(app, cdomain, openbao = false)
+      return nginx_certs_openbao(app, cdomain) if openbao
+
       ret_json = {}
 
       # Check if certs exists in a data bag
@@ -68,6 +73,28 @@ module Nginx
         end
       else
         ret_json = nginx_cert_item
+      end
+      ret_json
+    end
+
+    def nginx_certs_openbao(app, cdomain)
+      begin
+        item = data_bag_item('certs', app).to_hash
+      rescue
+        item = {}
+      end
+      return item.reject { |k, _| k == "#{app}_key" } if item["#{app}_crt"]
+
+      # Not generated yet (first manager, or first chef-solo run): generate in memory
+      cert = create_cert("#{app}.#{cdomain}")
+      OpenBao.seed_cert_key(app, cert[:key].to_pem, "/run/rb-secrets/nginx/#{app}.key", 'nginx')
+      ret_json = { 'id' => app, "#{app}_crt" => Base64.urlsafe_encode64(cert[:crt].to_pem) }
+      FileUtils.mkdir_p('/var/chef/data/data_bag/certs')
+      File.write("/var/chef/data/data_bag/certs/#{app}.json", ret_json.to_json) # public cert only
+      if File.exist?('/root/.chef/knife.rb')
+        system("knife data bag from file certs /var/chef/data/data_bag/certs/#{app}.json")
+      else
+        Chef::Log.warn('knife command not available, certs databag wont be uploaded')
       end
       ret_json
     end

@@ -56,7 +56,8 @@ action :configure_certs do
     service_name = new_resource.service_name
     cdomain = get_cdomain
 
-    json_cert = nginx_certs(service_name, cdomain)
+    openbao = new_resource.openbao
+    json_cert = nginx_certs(service_name, cdomain, openbao)
 
     template "/etc/nginx/ssl/#{service_name}.crt" do
       source 'cert.crt.erb'
@@ -70,16 +71,34 @@ action :configure_certs do
       action :create
     end
 
-    template "/etc/nginx/ssl/#{service_name}.key" do
-      source 'cert.key.erb'
-      owner user
-      group user
-      mode '0644'
-      retries 2
-      cookbook 'nginx'
-      not_if { json_cert.empty? }
-      variables(key: json_cert["#{service_name}_key"])
-      action :create
+    if openbao
+      # Private key only in memory: agent renders it from OpenBao (secret/cert_<service>, field key)
+      openbao_secret_file "nginx-#{service_name}-key" do
+        source 'cert.key.ctmpl.erb'
+        cookbook 'nginx'
+        variables(app: service_name)
+        destination "/run/rb-secrets/nginx/#{service_name}.key"
+        owner 'root'
+        group user
+        mode '0640'
+        unit 'nginx'
+      end
+
+      link "/etc/nginx/ssl/#{service_name}.key" do
+        to "/run/rb-secrets/nginx/#{service_name}.key"
+      end
+    else
+      template "/etc/nginx/ssl/#{service_name}.key" do
+        source 'cert.key.erb'
+        owner user
+        group user
+        mode '0644'
+        retries 2
+        cookbook 'nginx'
+        not_if { json_cert.empty? }
+        variables(key: json_cert["#{service_name}_key"])
+        action :create
+      end
     end
 
     Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
