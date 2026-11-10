@@ -78,6 +78,7 @@ action :configure_certs do
         cookbook 'nginx'
         variables(app: service_name)
         destination "/run/rb-secrets/nginx/#{service_name}.key"
+        selinux_type 'cert_t' # nginx runs confined (httpd_t): same label as /etc/pki/tls/private
         owner 'root'
         group user
         mode '0640'
