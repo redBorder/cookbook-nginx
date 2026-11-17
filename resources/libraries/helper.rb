@@ -78,9 +78,15 @@ module Nginx
     end
 
     def nginx_certs_openbao(app, cdomain)
+      # A new cert only when the item really does not exist: on any other error (Chef server still starting
+      # after a reboot) a new cert would not match the key OpenBao keeps (seeds never overwrite it): nginx down.
       begin
         item = data_bag_item('certs', app).to_hash
-      rescue
+      rescue Net::HTTPClientException => e
+        raise unless e.response.code == '404'
+        item = {}
+      rescue StandardError
+        raise unless Chef::Config[:solo_legacy_mode] || Chef::Config[:local_mode] # no server: first install
         item = {}
       end
       return item.reject { |k, _| k == "#{app}_key" } if item["#{app}_crt"]
@@ -91,7 +97,8 @@ module Nginx
       ret_json = { 'id' => app, "#{app}_crt" => Base64.urlsafe_encode64(cert[:crt].to_pem) }
       FileUtils.mkdir_p('/var/chef/data/data_bag/certs')
       File.write("/var/chef/data/data_bag/certs/#{app}.json", ret_json.to_json) # public cert only
-      if File.exist?('/root/.chef/knife.rb')
+      # a chef-solo run on a joining manager must not replace the cluster's cert (its key is in OpenBao)
+      if File.exist?('/root/.chef/knife.rb') && !system("knife data bag show certs #{app} >/dev/null 2>&1")
         system("knife data bag from file certs /var/chef/data/data_bag/certs/#{app}.json")
       else
         Chef::Log.warn('knife command not available, certs databag wont be uploaded')
