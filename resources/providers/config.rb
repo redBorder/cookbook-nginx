@@ -88,6 +88,27 @@ action :configure_certs do
       link "/etc/nginx/ssl/#{service_name}.key" do
         to "/run/rb-secrets/nginx/#{service_name}.key"
       end
+
+      # nginx.service runs its own ExecStartPre (nginx -t) before the 50-openbao waits: started right after an unseal it
+      # fails at once (keys not rendered yet) and stays down. Wait for every ssl_certificate_key first, then the
+      # unit's own steps. ($$: systemd escape)
+      directory '/etc/systemd/system/nginx.service.d'
+      file '/etc/systemd/system/nginx.service.d/40-openbao-order.conf' do
+        content <<~'UNIT'
+          [Service]
+          ExecStartPre=
+          ExecStartPre=/bin/sh -c 'for i in $$(seq 90); do m=0; for k in $$(grep -rhoE "^[[:space:]]*ssl_certificate_key[[:space:]]+[^;]+" /etc/nginx | sed -E "s/.*ssl_certificate_key[[:space:]]+//" | sort -u); do [ -s "$$k" ] || m=1; done; [ $$m = 0 ] && exit 0; sleep 1; done; echo "nginx keys not rendered by openbao-agent (sealed?)"; exit 1'
+          ExecStartPre=/usr/bin/rm -f /run/nginx.pid
+          ExecStartPre=/usr/sbin/nginx -t
+        UNIT
+        mode '0644'
+        notifies :run, 'execute[nginx daemon-reload]', :immediately
+      end
+
+      execute 'nginx daemon-reload' do
+        command 'systemctl daemon-reload'
+        action :nothing
+      end
     else
       template "/etc/nginx/ssl/#{service_name}.key" do
         source 'cert.key.erb'
