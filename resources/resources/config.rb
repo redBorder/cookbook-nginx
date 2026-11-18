@@ -15,7 +15,6 @@ attribute :aioutliers_hosts, kind_of: Array
 attribute :aioutliers_port, kind_of: Integer, default: 39091
 attribute :cdomain, kind_of: String, default: 'redborder.cluster'
 attribute :service_name, kind_of: String
-# true: private keys live in OpenBao and are rendered by the agent into /run (never on disk)
 attribute :openbao, kind_of: [TrueClass, FalseClass], default: false
 attribute :hub_port, kind_of: Integer, default: 8010
 attribute :hub_hosts, kind_of: Array

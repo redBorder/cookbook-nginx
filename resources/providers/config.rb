@@ -72,13 +72,12 @@ action :configure_certs do
     end
 
     if openbao
-      # Private key only in memory: agent renders it from OpenBao (secret/cert_<service>, field key)
       openbao_secret_file "nginx-#{service_name}-key" do
         source 'cert.key.ctmpl.erb'
         cookbook 'nginx'
         variables(app: service_name)
         destination "/run/rb-secrets/nginx/#{service_name}.key"
-        selinux_type 'cert_t' # nginx runs confined (httpd_t): same label as /etc/pki/tls/private
+        selinux_type 'cert_t' # nginx runs confined (httpd_t)
         owner 'root'
         group user
         mode '0640'
@@ -89,9 +88,7 @@ action :configure_certs do
         to "/run/rb-secrets/nginx/#{service_name}.key"
       end
 
-      # nginx.service runs its own ExecStartPre (nginx -t) before the 50-openbao waits: started right after an unseal it
-      # fails at once (keys not rendered yet) and stays down. Wait for every ssl_certificate_key first, then the
-      # unit's own steps. ($$: systemd escape)
+      # nginx -t fails until the agent rendered the keys ($$: systemd escape)
       directory '/etc/systemd/system/nginx.service.d'
       file '/etc/systemd/system/nginx.service.d/40-openbao-order.conf' do
         content <<~'UNIT'
