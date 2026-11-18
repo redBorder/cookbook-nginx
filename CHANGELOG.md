@@ -1,6 +1,11 @@
 cookbook-nginx CHANGELOG
 ===============
 
+## 1.7.2
+
+  - Vimesa
+    - [39cbbd5] Feature/#26699 config grr ssl (#53)
+
 ## 1.7.1
 
   - manegron
