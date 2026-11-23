@@ -44,9 +44,7 @@ module Nginx
       ret_json
     end
 
-    def nginx_certs(app, cdomain, openbao = false)
-      return nginx_certs_openbao(app, cdomain) if openbao
-
+    def nginx_certs(app, cdomain)
       ret_json = {}
 
       # Check if certs exists in a data bag

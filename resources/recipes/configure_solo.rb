@@ -5,7 +5,5 @@
 
 nginx_config 'config' do
   service_name 's3'
-  # before the data bags exist
-  openbao node['redborder'] && node['redborder']['openbao_secrets'] == true
   action [:add, :configure_certs, :add_s3]
 end

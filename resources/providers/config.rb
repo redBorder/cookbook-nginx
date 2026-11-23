@@ -56,8 +56,7 @@ action :configure_certs do
     service_name = new_resource.service_name
     cdomain = get_cdomain
 
-    openbao = new_resource.openbao
-    json_cert = nginx_certs(service_name, cdomain, openbao)
+    json_cert = nginx_certs_openbao(service_name, cdomain)
 
     template "/etc/nginx/ssl/#{service_name}.crt" do
       source 'cert.crt.erb'
@@ -71,53 +70,39 @@ action :configure_certs do
       action :create
     end
 
-    if openbao
-      openbao_secret_file "nginx-#{service_name}-key" do
-        source 'cert.key.ctmpl.erb'
-        cookbook 'nginx'
-        variables(app: service_name)
-        destination "/run/rb-secrets/nginx/#{service_name}.key"
-        selinux_type 'cert_t' # nginx runs confined (httpd_t)
-        owner 'root'
-        group user
-        mode '0640'
-        unit 'nginx'
-      end
+    openbao_secret_file "nginx-#{service_name}-key" do
+      source 'cert.key.ctmpl.erb'
+      cookbook 'nginx'
+      variables(app: service_name)
+      destination "/run/rb-secrets/nginx/#{service_name}.key"
+      selinux_type 'cert_t' # nginx runs confined (httpd_t)
+      owner 'root'
+      group user
+      mode '0640'
+      unit 'nginx'
+    end
 
-      link "/etc/nginx/ssl/#{service_name}.key" do
-        to "/run/rb-secrets/nginx/#{service_name}.key"
-      end
+    link "/etc/nginx/ssl/#{service_name}.key" do
+      to "/run/rb-secrets/nginx/#{service_name}.key"
+    end
 
-      # nginx -t fails until the agent rendered the keys ($$: systemd escape)
-      directory '/etc/systemd/system/nginx.service.d'
-      file '/etc/systemd/system/nginx.service.d/40-openbao-order.conf' do
-        content <<~'UNIT'
-          [Service]
-          ExecStartPre=
-          ExecStartPre=/bin/sh -c 'for i in $$(seq 90); do m=0; for k in $$(grep -rhoE "^[[:space:]]*ssl_certificate_key[[:space:]]+[^;]+" /etc/nginx | sed -E "s/.*ssl_certificate_key[[:space:]]+//" | sort -u); do [ -s "$$k" ] || m=1; done; [ $$m = 0 ] && exit 0; sleep 1; done; echo "nginx keys not rendered by openbao-agent (sealed?)"; exit 1'
-          ExecStartPre=/usr/bin/rm -f /run/nginx.pid
-          ExecStartPre=/usr/sbin/nginx -t
-        UNIT
-        mode '0644'
-        notifies :run, 'execute[nginx daemon-reload]', :immediately
-      end
+    # nginx -t fails until the agent rendered the keys ($$: systemd escape)
+    directory '/etc/systemd/system/nginx.service.d'
+    file '/etc/systemd/system/nginx.service.d/40-openbao-order.conf' do
+      content <<~'UNIT'
+        [Service]
+        ExecStartPre=
+        ExecStartPre=/bin/sh -c 'for i in $$(seq 90); do m=0; for k in $$(grep -rhoE "^[[:space:]]*ssl_certificate_key[[:space:]]+[^;]+" /etc/nginx | sed -E "s/.*ssl_certificate_key[[:space:]]+//" | sort -u); do [ -s "$$k" ] || m=1; done; [ $$m = 0 ] && exit 0; sleep 1; done; echo "nginx keys not rendered by openbao-agent (sealed?)"; exit 1'
+        ExecStartPre=/usr/bin/rm -f /run/nginx.pid
+        ExecStartPre=/usr/sbin/nginx -t
+      UNIT
+      mode '0644'
+      notifies :run, 'execute[nginx daemon-reload]', :immediately
+    end
 
-      execute 'nginx daemon-reload' do
-        command 'systemctl daemon-reload'
-        action :nothing
-      end
-    else
-      template "/etc/nginx/ssl/#{service_name}.key" do
-        source 'cert.key.erb'
-        owner user
-        group user
-        mode '0644'
-        retries 2
-        cookbook 'nginx'
-        not_if { json_cert.empty? }
-        variables(key: json_cert["#{service_name}_key"])
-        action :create
-      end
+    execute 'nginx daemon-reload' do
+      command 'systemctl daemon-reload'
+      action :nothing
     end
 
     Chef::Log.info("Nginx cookbook - Certs for service #{service_name} has been processed")
