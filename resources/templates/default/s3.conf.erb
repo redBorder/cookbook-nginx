@@ -38,7 +38,8 @@ server {
 
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto https;
+    # No X-Forwarded-Proto: with "https" SeaweedFS drops the :443 of the Host header before
+    # checking the signature, and erchef signs its presigned URLs with s3.service...:443
     proxy_pass_request_headers on;
     proxy_connect_timeout  90;
     proxy_send_timeout     90;
