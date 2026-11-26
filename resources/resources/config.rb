@@ -8,7 +8,7 @@ attribute :user, kind_of: String, default: 'nginx'
 attribute :http2k_port, kind_of: Integer, default: 9000
 attribute :http2k_hosts, kind_of: Array
 attribute :s3_port, kind_of: Integer, default: 7980
-attribute :s3_hosts, kind_of: Array, default: ['localhost:9000']
+attribute :s3_hosts, kind_of: Array, default: ['localhost:8333']
 attribute :erchef_hosts, kind_of: Array
 attribute :erchef_port, kind_of: Integer, default: 4443
 attribute :aioutliers_hosts, kind_of: Array
